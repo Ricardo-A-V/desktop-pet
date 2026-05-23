@@ -1,7 +1,7 @@
 {
     "comportamiento": {
-        "probabilidad_quieto": 0,
-        "probabilidad_mover": 1,
+        "probabilidad_quieto": 0.5,
+        "probabilidad_mover": 0.5,
         "tiempo_reposo_min": 1000,
         "tiempo_reposo_max": 4000,
         "distancia_min": 50,
@@ -11,16 +11,16 @@
         "animar_en_reposo": false
     },
     "geometria": {
-        "size_idle_w": 332,
-        "size_idle_h": 332,
-        "size_walk_w": 332,
-        "size_walk_h": 332,
-        "offset_y": 5
+        "size_idle_w": 240,
+        "size_idle_h": 240,
+        "size_walk_w": 240,
+        "size_walk_h": 240,
+        "offset_y": 6
     },
     "imagenes": {
         "idle": "quieto.png",
         "walk_prefix": "frame",
-        "walk_frames": 6,
+        "walk_frames": 4,
         "walk_suffix": ".png",
         "exit_anim": "warpstar.png",
         "frame_rate_activo": 300,
