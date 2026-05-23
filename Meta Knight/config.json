@@ -1,0 +1,35 @@
+{
+    "comportamiento": {
+        "probabilidad_quieto": 0.5,
+        "probabilidad_mover": 0.5,
+        "tiempo_reposo_min": 1000,
+        "tiempo_reposo_max": 4000,
+        "distancia_min": 50,
+        "distancia_max": 300,
+        "velocidad_paso": 6,
+        "tasa_refresco_fisica": 30,
+        "animar_en_reposo": true,
+        "vuelo_amplitud": 15, 
+        "vuelo_frecuencia": 5.0
+    },
+    "geometria": {
+        "size_idle_w": 332,
+        "size_idle_h": 332,
+        "size_walk_w": 332,
+        "size_walk_h": 332,
+        "offset_y": -40
+    },
+    "imagenes": {
+        "idle": "quieto.png",
+        "walk_prefix": "frame",
+        "walk_frames": 6,
+        "walk_suffix": ".png",
+        "exit_anim": "warpstar.png",
+        "frame_rate_activo": 100,
+        "frame_rate_reposo": 500
+    },
+    "audio": {
+        "exit_sound": "warpstar.mp3",
+        "volumen": 0.1
+    }
+}
