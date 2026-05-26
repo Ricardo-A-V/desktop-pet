@@ -11,7 +11,7 @@
         "animar_en_reposo": false
     },
     "geometria": {
-        "size_idle_w": 164,
+        "size_idle_w": 114,
         "size_idle_h": 164,
         "size_walk_w": 164,
         "size_walk_h": 164,
@@ -34,6 +34,6 @@
     },
     "audio": {
         "exit_sound": "warpstar.mp3",
-        "volumen": 0.2
+        "volumen": 0.1
     }
 }
