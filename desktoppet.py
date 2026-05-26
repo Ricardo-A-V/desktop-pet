@@ -18,11 +18,14 @@ class DesktopPetAnimator:
         self.last_state = None
         self.is_facing_right = True
         self.tk_image_ref = None
+        
+        # EL NÚCLEO DEL RELOJ: Registramos el momento exacto de nacimiento
+        self.last_frame_time = time.time()
 
         self.invertir_eje_x = config_img.get("invertir_eje_x", False)
         self.idle_is_animated = config_img.get("idle_is_animated", False)
-        # NUEVA LECTURA: ¿Utiliza sprites asimétricos para caminar?
         self.directional_walk = config_img.get("directional_walk", False)
+        self.fijar_direccion_reposo = config_img.get("fijar_direccion_reposo", False)
 
         filtro_escalado = Image.Resampling.NEAREST 
 
@@ -76,16 +79,28 @@ class DesktopPetAnimator:
             messagebox.showerror("Error Crítico de Assets", f"Falta un archivo de imagen en la carpeta.\nDetalle: {e}")
             sys.exit(1)
 
-    def update_animation(self, state, facing_right, canvas_image_id, animar_reposo=False):
-        if state != self.last_state:
+    # NUEVO PARÁMETRO AÑADIDO: fps_ms (La tasa que dicta el archivo JSON)
+    def update_animation(self, state, facing_right, canvas_image_id, animar_reposo, fps_ms):
+        if state == 'saliendo': return
+
+        # CÁLCULO DE DELTA TIME: Miramos el reloj del sistema operativo
+        tiempo_actual = time.time()
+        tiempo_transcurrido_ms = (tiempo_actual - self.last_frame_time) * 1000
+        cambio_estado = state != self.last_state
+
+        # LA BARRERA DE RENDIMIENTO: Si no ha pasado el tiempo real, cancelamos el renderizado.
+        if not cambio_estado and tiempo_transcurrido_ms < fps_ms:
+            return 
+
+        if cambio_estado:
             transicion_fluida = (not self.idle_is_animated) and animar_reposo and state in ['quieto', 'caminando'] and self.last_state in ['quieto', 'caminando']
             if not transicion_fluida:
                 self.current_frame_index = 0
             self.last_state = state
 
-        if state == 'saliendo': return
+        # Reiniciamos el cronómetro solo porque hemos decidido dibujar un nuevo fotograma
+        self.last_frame_time = tiempo_actual
 
-        # Bandera estructural para deshabilitar el espejo matemático si los assets ya son asimétricos
         deshabilitar_espejo = False
 
         # 3. LÓGICA DE SELECCIÓN DE FOTOGRAMAS
@@ -93,7 +108,6 @@ class DesktopPetAnimator:
             if self.directional_walk:
                 deshabilitar_espejo = True
                 matriz_activa = self.frames_walk_right if facing_right else self.frames_walk_left
-                # Prevenir colapso si las animaciones de derecha/izquierda tienen distinta cantidad de fotogramas
                 if self.current_frame_index >= len(matriz_activa): 
                     self.current_frame_index = 0
                 raw_image = matriz_activa[self.current_frame_index]
@@ -107,7 +121,6 @@ class DesktopPetAnimator:
                 raw_image = self.frames_idle[self.current_frame_index]
                 self.current_frame_index = (self.current_frame_index + 1) % len(self.frames_idle)
             elif animar_reposo:
-                # Si se anima en reposo reciclando la caminata asimétrica
                 if self.directional_walk:
                     deshabilitar_espejo = True
                     matriz_activa = self.frames_walk_right if facing_right else self.frames_walk_left
@@ -121,13 +134,14 @@ class DesktopPetAnimator:
             else:
                 raw_image = self.img_idle
 
-        # 4. ESPEJADO MATEMÁTICO (Con sobreescritura direccional)
+        # 4. ESPEJADO MATEMÁTICO
         if deshabilitar_espejo:
             processed_image = raw_image
         else:
-            # EL PARCHE: Si la mascota está quieta, ignoramos la última dirección de caminata 
-            # y forzamos matemáticamente su postura base (True = mirando al frente/derecha).
-            direccion_efectiva = True if state == 'quieto' else facing_right
+            if state == 'quieto' and self.fijar_direccion_reposo:
+                direccion_efectiva = True 
+            else:
+                direccion_efectiva = facing_right
             
             debe_espejar = direccion_efectiva if self.invertir_eje_x else (not direccion_efectiva)
             
@@ -345,13 +359,18 @@ class DesktopPet:
     def animate_loop(self):
         if self.current_state == 'saliendo': return 
         
+        # Extraemos la velocidad que desea el JSON
         if self.current_state == 'caminando' or (self.current_state == 'quieto' and self.animar_en_reposo):
-            fps = self.frame_rate_activo
+            velocidad_objetivo_ms = self.frame_rate_activo
         else:
-            fps = self.frame_rate_reposo
+            velocidad_objetivo_ms = self.frame_rate_reposo
             
-        self.animator.update_animation(self.current_state, self.is_facing_right, self.canvas_image_id, self.animar_en_reposo)
-        self.anim_timer = self.root.after(fps, self.animate_loop)
+        # Le enviamos el objetivo al animador. Él mirará el reloj y decidirá si pintar o ignorar.
+        self.animator.update_animation(self.current_state, self.is_facing_right, self.canvas_image_id, self.animar_en_reposo, velocidad_objetivo_ms)
+        
+        # Obligamos a Tkinter a procesar el motor visual a 60 FPS fijos (~16ms).
+        # Esto elimina de cuajo la desincronización por bloqueos del hilo principal.
+        self.anim_timer = self.root.after(16, self.animate_loop)
 
     def mantener_siempre_arriba(self):
         if self.current_state != 'saliendo':

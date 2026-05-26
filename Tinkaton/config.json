@@ -33,7 +33,8 @@
         "exit_anim": "warpstar.png",
         "frame_rate_activo": 300,
         "frame_rate_reposo": 300,
-        "invertir_eje_x": false
+        "invertir_eje_x": false,
+        "fijar_direccion_reposo": true
     },
     "audio": {
         "exit_sound": "warpstar.mp3",
