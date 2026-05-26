@@ -24,13 +24,19 @@
         "idle_suffix": ".png",
         
         "idle": "quieto.png", 
+        "directional_walk": true,
+        "walk_right_prefix": "r_",
+        "walk_right_frames": 2,
+        "walk_left_prefix": "l_",
+        "walk_left_frames": 2, 
         "walk_prefix": "frame",
         "walk_frames": 2,
         "walk_suffix": ".png",
         "exit_anim": "warpstar.png",
         "frame_rate_activo": 300,
         "frame_rate_reposo": 300,
-        "invertir_eje_x": false
+        "invertir_eje_x": false,
+        "fijar_direccion_reposo": true
     },
     "audio": {
         "exit_sound": "warpstar.mp3",
