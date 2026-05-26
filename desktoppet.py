@@ -19,24 +19,35 @@ class DesktopPetAnimator:
         self.is_facing_right = True
         self.tk_image_ref = None
 
-        # NUEVA LECTURA DE DATOS: Define hacia dónde miran los sprites originales
         self.invertir_eje_x = config_img.get("invertir_eje_x", False)
+        # NUEVA LECTURA: ¿Tiene una animación de reposo dedicada?
+        self.idle_is_animated = config_img.get("idle_is_animated", False)
 
-        filtro_escalado = Image.Resampling.NEAREST
+        filtro_escalado = Image.Resampling.NEAREST 
 
-        # Filtro algorítmico para destruir bordes semitransparentes (Anti-Aliasing)
         def limpiar_alfa(imagen):
             img = imagen.convert("RGBA")
             r, g, b, a = img.split()
-            # Si el canal alfa > 127, se vuelve 255 (sólido). Si no, 0 (invisible).
             a = a.point(lambda p: 255 if p > 127 else 0) 
             return Image.merge("RGBA", (r, g, b, a))
 
         try:
-            img_idle_path = config_img.get("idle", "quieto.png")
-            raw_idle = limpiar_alfa(Image.open(img_idle_path))
-            self.img_idle = raw_idle.resize(size_idle, filtro_escalado)
+            # 1. Cargar animación de REPOSO (o imagen estática clásica si no está configurado)
+            if self.idle_is_animated:
+                self.frames_idle = []
+                pref_idle = config_img.get("idle_prefix", "idle_")
+                suf_idle = config_img.get("idle_suffix", ".png")
+                num_idle = config_img.get("idle_frames", 4)
+                for i in range(num_idle):
+                    img_path = f"{pref_idle}{i}{suf_idle}"
+                    raw_frame = limpiar_alfa(Image.open(img_path))
+                    self.frames_idle.append(raw_frame.resize(size_idle, filtro_escalado))
+            else:
+                img_idle_path = config_img.get("idle", "quieto.png")
+                raw_idle = limpiar_alfa(Image.open(img_idle_path))
+                self.img_idle = raw_idle.resize(size_idle, filtro_escalado)
             
+            # 2. Cargar animación de CAMINATA
             self.frames_walk = []
             prefijo = config_img.get("walk_prefix", "frame")
             sufijo = config_img.get("walk_suffix", ".png")
@@ -45,8 +56,7 @@ class DesktopPetAnimator:
             for i in range(num_frames):
                 img_path = f"{prefijo}{i}{sufijo}"
                 raw_frame = limpiar_alfa(Image.open(img_path))
-                resized_frame = raw_frame.resize(size_walk, filtro_escalado)
-                self.frames_walk.append(resized_frame)
+                self.frames_walk.append(raw_frame.resize(size_walk, filtro_escalado))
                 
         except FileNotFoundError as e:
             tk.Tk().withdraw()
@@ -55,8 +65,8 @@ class DesktopPetAnimator:
 
     def update_animation(self, state, facing_right, canvas_image_id, animar_reposo=False):
         if state != self.last_state:
-            # Evaluar si se debe mantener la fluidez del fotograma
-            transicion_fluida = animar_reposo and state in ['quieto', 'caminando'] and self.last_state in ['quieto', 'caminando']
+            # La transición fluida de índices solo tiene sentido si ambas acciones comparten los mismos fotogramas
+            transicion_fluida = (not self.idle_is_animated) and animar_reposo and state in ['quieto', 'caminando'] and self.last_state in ['quieto', 'caminando']
             
             if not transicion_fluida:
                 self.current_frame_index = 0
@@ -65,15 +75,25 @@ class DesktopPetAnimator:
 
         if state == 'saliendo': return
 
-        if state == 'caminando' or (state == 'quieto' and animar_reposo):
+        # 3. LÓGICA DE SELECCIÓN DE FOTOGRAMAS
+        if state == 'caminando':
             raw_image = self.frames_walk[self.current_frame_index]
             self.current_frame_index = (self.current_frame_index + 1) % len(self.frames_walk)
-        else:
-            raw_image = self.img_idle
+            
+        elif state == 'quieto':
+            if self.idle_is_animated:
+                # Nueva lógica: Iterar sobre la matriz dedicada de reposo
+                raw_image = self.frames_idle[self.current_frame_index]
+                self.current_frame_index = (self.current_frame_index + 1) % len(self.frames_idle)
+            elif animar_reposo:
+                # Fallback: Reciclar caminata (tu versión anterior)
+                raw_image = self.frames_walk[self.current_frame_index]
+                self.current_frame_index = (self.current_frame_index + 1) % len(self.frames_walk)
+            else:
+                # Fallback clásico: Kirby estático
+                raw_image = self.img_idle
 
-        # Lógica Condicional: 
-        # Si la imagen original mira a la izquierda (invertir_eje_x = True), hay que espejarla al caminar a la DERECHA.
-        # Si la imagen original mira a la derecha (Kirby), hay que espejarla al caminar a la IZQUIERDA.
+        # 4. ESPEJADO MATEMÁTICO
         debe_espejar = facing_right if self.invertir_eje_x else (not facing_right)
 
         if debe_espejar:
