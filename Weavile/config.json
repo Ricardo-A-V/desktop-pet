@@ -11,9 +11,9 @@
         "animar_en_reposo": false
     },
     "geometria": {
-        "size_idle_w": 164,
+        "size_idle_w": 150,
         "size_idle_h": 164,
-        "size_walk_w": 164,
+        "size_walk_w": 122,
         "size_walk_h": 164,
         "offset_y": 5
     },

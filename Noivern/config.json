@@ -8,14 +8,16 @@
         "distancia_max": 300,
         "velocidad_paso": 6,
         "tasa_refresco_fisica": 30,
-        "animar_en_reposo": false
+        "animar_en_reposo": false,
+        "vuelo_amplitud": 10, 
+        "vuelo_frecuencia": 5.0
     },
     "geometria": {
-        "size_idle_w": 164,
+        "size_idle_w": 204,
         "size_idle_h": 164,
         "size_walk_w": 164,
         "size_walk_h": 164,
-        "offset_y": 5
+        "offset_y": -35
     },
     "imagenes": {
         "idle_is_animated": true,
@@ -34,6 +36,6 @@
     },
     "audio": {
         "exit_sound": "warpstar.mp3",
-        "volumen": 0.2
+        "volumen": 0.1
     }
 }
