@@ -1,0 +1,39 @@
+{
+    "comportamiento": {
+        "probabilidad_quieto": 0.5,
+        "probabilidad_mover": 0.5,
+        "tiempo_reposo_min": 1000,
+        "tiempo_reposo_max": 4000,
+        "distancia_min": 50,
+        "distancia_max": 300,
+        "velocidad_paso": 6,
+        "tasa_refresco_fisica": 30,
+        "animar_en_reposo": false
+    },
+    "geometria": {
+        "size_idle_w": 164,
+        "size_idle_h": 164,
+        "size_walk_w": 164,
+        "size_walk_h": 164,
+        "offset_y": 5
+    },
+    "imagenes": {
+        "idle_is_animated": true,
+        "idle_prefix": "idle_",
+        "idle_frames": 2,
+        "idle_suffix": ".png",
+        
+        "idle": "quieto.png", 
+        "walk_prefix": "frame",
+        "walk_frames": 2,
+        "walk_suffix": ".png",
+        "exit_anim": "warpstar.png",
+        "frame_rate_activo": 300,
+        "frame_rate_reposo": 300,
+        "invertir_eje_x": false
+    },
+    "audio": {
+        "exit_sound": "warpstar.mp3",
+        "volumen": 0.2
+    }
+}

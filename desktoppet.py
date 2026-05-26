@@ -349,38 +349,74 @@ class PetLauncher:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Selector de Mascotas")
-        self.root.geometry("300x400")
+        # Geometría expandida para alojar la barra de desplazamiento
+        self.root.geometry("320x450")
         self.root.resizable(False, False)
         
-        # Inyección de color: Amarillo ocre suave para legibilidad UI
-        color_fondo = "#F4D03F" 
-        self.root.config(bg=color_fondo)
+        color_borde = "#000000"  
+        color_fondo = "#F4D03F"  
+        grosor_borde = 8         
         
+        self.root.config(bg=color_borde)
         self.root.eval('tk::PlaceWindow . center')
 
-        # Se debe propagar el bg a los Labels para no romper la estética
-        tk.Label(self.root, text="Elige tu mascota", font=("Helvetica", 14, "bold"), bg=color_fondo).pack(pady=20)
+        self.container = tk.Frame(self.root, bg=color_fondo)
+        self.container.pack(fill=tk.BOTH, expand=True, padx=grosor_borde, pady=grosor_borde)
+
+        tk.Label(self.container, text="Elige tu mascota", font=("Helvetica", 14, "bold"), bg=color_fondo).pack(pady=15)
 
         self.mascotas_disponibles = self.escanear_mascotas()
 
         if not self.mascotas_disponibles:
-            tk.Label(self.root, text="No se encontraron mascotas.", fg="red", bg=color_fondo).pack(pady=10)
-            tk.Label(self.root, text="Crea subcarpetas que contengan\nun archivo 'config.json'.", bg=color_fondo).pack()
+            tk.Label(self.container, text="No se encontraron mascotas.", fg="red", bg=color_fondo).pack(pady=10)
+            tk.Label(self.container, text="Crea subcarpetas que contengan\nun archivo 'config.json'.", bg=color_fondo).pack()
         else:
+            # 1. Crear un marco dedicado para albergar el Canvas y la Scrollbar
+            frame_lista = tk.Frame(self.container, bg=color_fondo)
+            frame_lista.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+
+            # 2. Inicializar Canvas y Scrollbar
+            canvas = tk.Canvas(frame_lista, bg=color_fondo, highlightthickness=0)
+            scrollbar = tk.Scrollbar(frame_lista, orient="vertical", command=canvas.yview)
+            
+            # 3. Contenedor interno desplazable
+            self.scrollable_frame = tk.Frame(canvas, bg=color_fondo)
+
+            # Recalcular el área de desplazamiento dinámicamente cada vez que se añade un botón
+            self.scrollable_frame.bind(
+                "<Configure>",
+                lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            )
+
+            # Anclar el marco al Canvas (width=250 asegura que el botón ocupe todo el ancho útil)
+            canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw", width=250)
+            canvas.configure(yscrollcommand=scrollbar.set)
+
+            # Empaquetar elementos de la lista
+            canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+            # 4. Captura del evento de la rueda del ratón (Windows)
+            def _on_mousewheel(event):
+                # El divisor 120 es el estándar de hardware en Windows para un "clic" de la rueda
+                canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            
+            canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+            # 5. Generación iterativa de botones
             for nombre_mascota, ruta_carpeta in self.mascotas_disponibles.items():
                 btn = tk.Button(
-                    self.root, 
-                    text=nombre_mascota, # <-- Eliminado el .capitalize() a petición
+                    self.scrollable_frame, 
+                    text=nombre_mascota, 
                     font=("Helvetica", 12),
-                    command=lambda ruta=ruta_carpeta: self.lanzar_mascota(ruta)
+                    command=lambda ruta=ruta_carpeta: self.lanzar_mascota(ruta, canvas)
                 )
-                btn.pack(fill=tk.X, padx=40, pady=5)
+                btn.pack(fill=tk.X, padx=10, pady=5)
 
         self.root.mainloop()
 
     def escanear_mascotas(self):
         mascotas = {}
-        
         if getattr(sys, 'frozen', False):
             base_dir = os.path.dirname(sys.executable)
         else:
@@ -394,7 +430,12 @@ class PetLauncher:
                     
         return mascotas
 
-    def lanzar_mascota(self, ruta_mascota):
+    def lanzar_mascota(self, ruta_mascota, canvas=None):
+        """Mata el menú, limpia la caché de eventos e inicializa el motor físico."""
+        if canvas:
+            # Desvincular evento global para evitar interferencias con el motor de la mascota
+            canvas.unbind_all("<MouseWheel>")
+            
         os.chdir(ruta_mascota) 
         self.root.destroy()
         DesktopPet()
