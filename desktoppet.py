@@ -9,6 +9,15 @@ from screeninfo import get_monitors
 import pygame
 import math
 import time
+import ctypes
+
+try:
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+except Exception:
+    try:
+        ctypes.windll.user32.SetProcessDPIAware()
+    except Exception:
+        pass
 
 class DesktopPetAnimator:
     """Clase dedicada exclusivamente a gestionar los fotogramas dinámicos de animación."""
