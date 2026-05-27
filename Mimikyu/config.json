@@ -11,10 +11,10 @@
         "animar_en_reposo": false
     },
     "geometria": {
-        "size_idle_w": 74,
-        "size_idle_h": 84,
-        "size_walk_w": 58,
-        "size_walk_h": 84,
+        "size_idle_w": 100,
+        "size_idle_h": 100,
+        "size_walk_w": 100,
+        "size_walk_h": 100,
         "offset_y": 5
     },
     "imagenes": {

@@ -5,16 +5,16 @@
         "tiempo_reposo_min": 1000,
         "tiempo_reposo_max": 4000,
         "distancia_min": 50,
-        "distancia_max": 300,
-        "velocidad_paso": 6,
+        "distancia_max": 500,
+        "velocidad_paso": 3,
         "tasa_refresco_fisica": 30,
         "animar_en_reposo": false
     },
     "geometria": {
-        "size_idle_w": 100,
-        "size_idle_h": 100,
-        "size_walk_w": 100,
-        "size_walk_h": 100,
+        "size_idle_w": 130,
+        "size_idle_h": 130,
+        "size_walk_w": 130,
+        "size_walk_h": 130,
         "offset_y": 5
     },
     "imagenes": {
@@ -28,8 +28,8 @@
         "walk_frames": 2,
         "walk_suffix": ".png",
         "exit_anim": "warpstar.png",
-        "frame_rate_activo": 300,
-        "frame_rate_reposo": 300,
+        "frame_rate_activo": 380,
+        "frame_rate_reposo": 500,
         "invertir_eje_x": false
     },
     "audio": {

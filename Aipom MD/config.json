@@ -11,26 +11,27 @@
         "animar_en_reposo": false
     },
     "geometria": {
-        "size_idle_w": 100,
-        "size_idle_h": 100,
-        "size_walk_w": 100,
-        "size_walk_h": 100,
-        "offset_y": 5
+        "size_idle_w": 140,
+        "size_idle_h": 140,
+        "size_walk_w": 140,
+        "size_walk_h": 140,
+        "offset_y": 21
     },
     "imagenes": {
         "idle_is_animated": true,
         "idle_prefix": "idle_",
-        "idle_frames": 2,
+        "idle_frames": 4,
         "idle_suffix": ".png",
         
         "idle": "quieto.png", 
         "walk_prefix": "frame",
-        "walk_frames": 2,
+        "walk_frames": 4,
         "walk_suffix": ".png",
         "exit_anim": "warpstar.png",
-        "frame_rate_activo": 300,
+        "frame_rate_activo": 200,
         "frame_rate_reposo": 300,
-        "invertir_eje_x": false
+        "invertir_eje_x": false,
+        "fijar_direccion_reposo": true
     },
     "audio": {
         "exit_sound": "warpstar.mp3",
